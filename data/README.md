@@ -1,0 +1,1 @@
+Go to this link and download the dataset => https://www.kaggle.com/datasets/yasserh/loan-default-dataset?resource=download

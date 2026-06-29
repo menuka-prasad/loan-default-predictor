@@ -1,0 +1,1 @@
+Here are the full walkthrough how to setup the environment for project.
