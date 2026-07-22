@@ -191,3 +191,24 @@ so here we should use median impute + missingness indicator. so we add `dtir1_mi
 - Derive after imputing
    - `property_value` → median impute, then recompute `LTV = loan_amount / property_value`
   
+
+# Post Coding Decisions
+since `term` is numeric feature and all other numeric features median imputed i also put it in numeric_pipeline.
+
+it is ok to do median impute instead of mode impute since only 41 missing.
+
+
+
+### Another Important point (related to preprocesssing)
+##### When you call `fit_transform(X_train)`, your preprocessor learns and stores:
+
+- StandardScaler → the mean and std of each numeric column, computed from training rows only
+- OrdinalEncoder → the category mappings seen in training data
+- OneHotEncoder → the exact set of categories seen in training data
+- SimpleImputer → the median/mode values computed from training rows only
+
+When you call `transform(X_test)`, it applies those stored values — the test set's numbers get scaled using the training mean and std, not their own.
+
+Here's the leakage scenario if you did it wrong: imagine you called `fit_transform(X_test)` separately. Your scaler would compute mean/std from test data. Your model was trained on data scaled with training statistics. Now your test evaluation is comparing apples to oranges — the scale is different. Worse, if you fit the imputer on the full dataset before splitting, your "training" imputer has seen test row values and incorporated them into the median. You've leaked future information into your training process, your CV scores look better than reality, and your deployed model underperforms because production data gets transformed with statistics it was never meant to use.
+
+One sentence summary of the rule: the test set must be treated as if it doesn't exist during fitting — it only gets transformed, never fit on.
