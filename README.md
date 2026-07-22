@@ -5,6 +5,3 @@
 4. run backend = `uvicorn app.main:app --reload`
 
 
-### Docker
-
-![alt text](image.png)
