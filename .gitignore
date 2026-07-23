@@ -49,3 +49,6 @@ Thumbs.db
 data/raw/*
 data/processed/*
 learn/*
+
+mlruns/
+artifacts/
