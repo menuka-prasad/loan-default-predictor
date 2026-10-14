@@ -10,3 +10,8 @@ pydantic
 pytest
 httpx
 xgboost
+skl2onnx
+onnxruntime
+onnx
+onnxmltools
+onnxconverter-common

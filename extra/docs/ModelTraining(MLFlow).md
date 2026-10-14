@@ -43,8 +43,46 @@ At application time, the customer fills out a form. `rate_of_interest` is someth
 
 **Decision: drop all four missingness indicators.**
 
+so now i went to `preprocessing_v1.ipynb` and commented out passthrough cols from ColumnTransformer. We dont need it because it does leaks target.
+
 But now we have real Domain Specific Problem.
 
 
 We were also keeping `rate_of_interest`, `Interest_rate_spread`, and `Upfront_charges` as features in numeric_cols. 
 **Same issue** — these are bank-set values that don't exist at application time.
+
+**So the real question is**: which columns in our dataset are known at application time (customer-provided or verifiable before approval) vs. set after approval?
+
+1. `approv_in_adv` — this means “pre-approved in advance.” At application time, does the bank know this? Actually yes — the customer either came in with a pre-approval or they didn’t. This is known upfront. Keep it.
+
+2. `Neg_ammortization` — this is a loan structure type (does the loan allow negative amortization where unpaid interest gets added to principal). This is a loan product feature the bank decides when structuring the loan, not something known from the application. Remove it.
+
+3. `rate_of_interest`, `Interest_rate_spread`, `Upfront_charges` — all bank-set after evaluation. Remove all three.
+
+4. `loan_limit` — bank-set based on customer profile. This is determined during the approval process, not submitted at application time. Remove it.
+
+5. `interest_only` — bank decision. Remove it.
+
+6. `lump_sum_payment` — you said “predefined by bank when issuing application” — that means it’s set at issuance, which is after the default prediction happens. Remove it.
+
+7. `term` — you said bank sets it based on customer request. The customer requests a term, the bank approves one. At application time you’d have the requested term as input, so this is borderline. For simplicity, keep it — it’s reasonable to assume the requested term is on the application form.
+
+8. `LTV` — both loan_amount and property_value are on the application. Keep it.
+
+
+## Final column removal list
+
+Remove these from your pipeline entirely — they’re post-approval or bank-set:
+
+1. `rate_of_interest`
+2. `Interest_rate_spread`
+3. `Upfront_charges`
+4. `Neg_ammortization`
+5. `loan_limit`
+6. `interest_only`
+7. `lump_sum_payment`
+8. `All four missingness indicator columns`
+
+this is called feature leakage audit and it’s a real step professional ML engineers do before training.
+
+Now we Are going to write the new preprocessing pipeline. (v2)
