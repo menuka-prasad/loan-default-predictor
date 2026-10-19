@@ -8,10 +8,11 @@ fastapi
 uvicorn
 pydantic
 pytest
-httpx
+httpx2
 xgboost
 skl2onnx
 onnxruntime
 onnx
 onnxmltools
 onnxconverter-common
+huggingface_hub
