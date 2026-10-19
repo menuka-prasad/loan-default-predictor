@@ -1,8 +1,36 @@
 import json
+import os
 import joblib
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from app.core.config import settings
+
+# now we use hugging face to get model artifacts instead of from local folder
+HF_REPO_ID = "menuka17/loan-default-predictor"
+
+def download_artifacts_if_missing():
+    """Download artifacts from huggingface hub if not present locally."""
+    from huggingface_hub import hf_hub_download
+    
+    os.makedirs(settings.ARTIFACTS_DIR, exist_ok=True)
+    
+    files = ["model.pkl", "preprocessor.pkl", "threshold.json"]
+    
+    for filename in files:
+        local_path = settings.ARTIFACTS_DIR / filename
+        if not local_path.exists():
+            print(f"Downloading {filename} from HF hub...")
+            hf_hub_download(
+                repo_id=HF_REPO_ID,
+                filename=filename,
+                local_dir=settings.ARTIFACTS_DIR,
+                repo_type="model"
+            )
+            print(f"Downloaded: {filename}")
+            
+        else:
+            print(f"Found locally: {filename}")
 
 class PredictionService:
     def __init__(self):
@@ -14,6 +42,8 @@ class PredictionService:
 
     def load_artifacts(self):
         """Load all artifacts once at startup."""
+        download_artifacts_if_missing()
+        
         self.preprocessor = joblib.load(settings.PREPROCESSOR_PATH)
         self.model = joblib.load(settings.MODEL_PATH)
         
